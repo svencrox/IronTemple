@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const HomePage = () => {
   return (
@@ -8,12 +9,12 @@ const HomePage = () => {
         <div className="flex container mx-auto px-4 py-6 justify-between">
             <h1 className="text-3xl font-bold text-gray-900">Fitness Tracker</h1>
             <div className="space-x-4 content-evenly">
-            <a href="/signup" className="text-blue-600 font-semibold">
+            <Link to="/signup" className="text-blue-600 font-semibold">
                 Sign Up
-            </a>
-            <a href="/login" className="text-blue-600 font-semibold">
+            </Link>
+            <Link to="/login" className="text-blue-600 font-semibold">
                 Login
-            </a>
+            </Link>
       </div>
         </div>
       </header>
@@ -25,9 +26,12 @@ const HomePage = () => {
           <p className="mt-4 text-lg">
             Stay motivated and achieve your fitness goals with personalized workouts, progress tracking, and more.
           </p>
-          <button className="mt-8 px-6 py-3 bg-white text-blue-600 font-semibold rounded-full shadow">
+          <Link
+            to="/get-started"
+            className="mt-8 px-6 py-3 bg-white text-blue-600 font-semibold rounded-full shadow inline-block"
+          >
             Get Started
-          </button>
+          </Link>
         </div>
       </section>
 

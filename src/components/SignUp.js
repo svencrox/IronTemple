@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ const SignUp = () => {
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <div className='flex justify-between mb-6'>
             <h2 className="text-2xl font-bold text-gray-900">Sign Up</h2>
-            <a className='border-solid rounded border px-2 content-evenly' href='/'>Back</a>
+            <Link className='border-solid rounded border px-2 content-evenly' to='/'>Back</Link>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
