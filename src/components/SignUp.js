@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook for navigation
+import { toast } from 'react-toastify';
+import { register } from '../service/authService';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -9,20 +12,39 @@ const SignUp = () => {
     confirmPassword: '',
   });
 
+  // state for handling errors
+  const [error, setError] = useState('');
+  
+  // Initialize useNavigate for redirection
+  const navigate = useNavigate(); 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Basic validation
+    // Basic validation for password match
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-    // Handle form submission (e.g., send data to backend)
-    console.log("Form submitted:", formData);
+    try {
+      const response = await register(formData.name, formData.email, formData.password);
+      console.log('User registered:', response);
+      
+      // Show success toast notification
+      toast.success('Registration successful! Redirecting to dashboard...');
+
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
+    } catch (error) {
+      console.error('Registration failed:', error);
+      setError('Registration failed, please try again');
+    }
   };
 
   return (
@@ -77,6 +99,7 @@ const SignUp = () => {
               required
             />
           </div>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
           <button
             type="submit"
             className="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold shadow-lg"
