@@ -24,16 +24,18 @@ const GetStarted = () => {
 
 	return (
 		<div className='min-h-screen bg-gray-100 flex items-center justify-center'>
-			<Link
-				to='/'
-				className='bg-white rounded-full absolute shadow-lg top-2 left-2 px-6 py-3 font-semibold'
-			>
-				Return
-			</Link>
 			<div className='bg-white p-8 rounded-lg shadow-lg w-full max-w-lg'>
-				<h2 className='text-3xl font-bold mb-6 text-gray-900'>
-					Let's Get Started!
-				</h2>
+				<div className='flex justify-between mb-6'>
+					<h2 className='text-3xl font-bold text-gray-900'>
+						Let's Get Started!
+					</h2>
+					<Link
+						to='/'
+						className='border-solid rounded border px-2 content-evenly'
+					>
+						Back
+					</Link>
+				</div>
 				<form onSubmit={handleSubmit}>
 					<div className='mb-4'>
 						<label className='block text-gray-700 mb-2'>
