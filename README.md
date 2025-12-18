@@ -1,70 +1,95 @@
-# Getting Started with Create React App
+# IronTemple - Fitness Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Temple of Iron** is a fitness tracking web application that helps you stay motivated and achieve your fitness goals with personalized workouts, progress tracking, and community support.
+
+## Features
+
+- **User Authentication**: Secure signup and login functionality
+- **Personalized Workouts**: Get workout routines tailored to your fitness level and goals
+- **Progress Tracking**: Monitor your progress and stay on track with your fitness journey
+- **Community Support**: Join a community of like-minded individuals to stay motivated
+
+## Tech Stack
+
+- **Frontend**: React 18
+- **Routing**: React Router DOM
+- **Styling**: Tailwind CSS
+- **HTTP Client**: Axios
+- **Notifications**: React Toastify
+- **Build Tool**: Create React App
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+- Backend API server running on `http://localhost:5000`
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd IronTemple
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
+npm start
+```
+
+The app will open at [http://localhost:3000](http://localhost:3000)
 
 ## Available Scripts
 
-In the project directory, you can run:
-
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Runs the app in development mode at [http://localhost:3000](http://localhost:3000).
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The page will reload when you make changes.
 
 ### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Launches the test runner in interactive watch mode.
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Builds the app for production to the `build` folder.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The build is optimized for the best performance, with minified files and hashed filenames.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Project Structure
 
-### `npm run eject`
+```
+src/
+├── components/
+│   ├── HomePage.js      # Landing page with features
+│   ├── SignUp.js        # User registration
+│   ├── Login.js         # User login
+│   └── GetStarted.js    # Onboarding page
+├── service/
+│   └── authService.js   # Authentication API integration
+├── App.js               # Main app with routing
+└── index.js             # Entry point
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## API Configuration
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The app expects a backend API running at `http://localhost:5000` with the following endpoints:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+To change the API URL, update the `API_URL` in `src/service/authService.js`.
 
-## Learn More
+## Contributing
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## License
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Copyright 2024 Temple of Iron. All rights reserved.
