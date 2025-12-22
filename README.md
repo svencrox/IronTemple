@@ -4,18 +4,30 @@
 
 ## Features
 
+### Authentication & Onboarding
 - **User Authentication**: Secure signup and login functionality
-- **Personalized Workouts**: Get workout routines tailored to your fitness level and goals
-- **Progress Tracking**: Monitor your progress and stay on track with your fitness journey
-- **Community Support**: Join a community of like-minded individuals to stay motivated
+- **Personalized Onboarding**: Set your fitness goals, experience level, and workout preferences
+
+### Workout Tracking (NEW ✨)
+- **Offline-First**: Track workouts without internet - syncs automatically when online
+- **Workout Logger**: Log exercises with sets, reps, and weight tracking
+- **Dynamic Exercise Management**: Add/remove exercises and sets on the fly
+- **Workout History**: Browse all workouts with filtering (All, This Week, This Month)
+- **Search Functionality**: Find workouts by name, exercise, or notes
+- **Progress Dashboard**: View workout statistics and recent activity
+- **Edit & Delete**: Full workout management capabilities
+- **Sync Status Indicator**: Real-time sync status with manual sync option
 
 ## Tech Stack
 
 - **Frontend**: React 18
-- **Routing**: React Router DOM
+- **Routing**: React Router DOM v6
 - **Styling**: Tailwind CSS
 - **HTTP Client**: Axios
 - **Notifications**: React Toastify
+- **State Management**: React Context API
+- **Storage**: LocalStorage (offline-first)
+- **ID Generation**: UUID
 - **Build Tool**: Create React App
 
 ## Prerequisites
@@ -67,24 +79,54 @@ The build is optimized for the best performance, with minified files and hashed 
 ```
 src/
 ├── components/
-│   ├── HomePage.js      # Landing page with features
-│   ├── SignUp.js        # User registration
-│   ├── Login.js         # User login
-│   └── GetStarted.js    # Onboarding page
+│   ├── HomePage.js           # Landing page with features
+│   ├── SignUp.js             # User registration
+│   ├── Login.js              # User login
+│   ├── GetStarted.js         # Onboarding/preferences form
+│   ├── Dashboard.js          # Main dashboard with stats & recent workouts
+│   ├── WorkoutLogger.js      # Create/edit workout with exercises & sets
+│   ├── WorkoutHistory.js     # Browse all workouts with filters & search
+│   ├── WorkoutDetail.js      # View single workout details
+│   └── common/
+│       ├── WorkoutCard.js        # Reusable workout card component
+│       ├── SyncStatusIndicator.js # Sync status badge
+│       ├── ExerciseForm.js       # Dynamic exercise input form
+│       └── SetRow.js             # Individual set input row
+├── context/
+│   └── SyncContext.js        # Global sync state management
 ├── service/
-│   └── authService.js   # Authentication API integration
-├── App.js               # Main app with routing
-└── index.js             # Entry point
+│   ├── authService.js        # Authentication API integration
+│   ├── trackingService.js    # Workout CRUD operations
+│   ├── syncService.js        # Offline-first sync engine
+│   └── storageService.js     # LocalStorage helper utilities
+├── App.js                    # Main app with routing & SyncProvider
+└── index.js                  # Entry point
 ```
 
 ## API Configuration
 
 The app expects a backend API running at `http://localhost:5000` with the following endpoints:
 
+### Authentication Endpoints
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 
-To change the API URL, update the `API_URL` in `src/service/authService.js`.
+### Workout Endpoints (To Be Implemented)
+- `POST /api/workouts` - Create new workout
+- `GET /api/workouts` - Get user's workouts
+- `GET /api/workouts/:id` - Get single workout
+- `PUT /api/workouts/:id` - Update workout
+- `DELETE /api/workouts/:id` - Delete workout
+- `GET /api/workouts/stats` - Get workout statistics
+
+### User Preferences Endpoint (To Be Implemented)
+- `PUT /api/users/preferences` - Save user fitness preferences
+
+To change the API URL, update the `API_URL` constants in:
+- `src/service/authService.js`
+- `src/service/syncService.js`
+
+**Note**: The app works completely offline! Workout data is stored in localStorage and will sync to the server when the backend API is available and you're online.
 
 ## Contributing
 
