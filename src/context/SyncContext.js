@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getSyncQueueStatus } from '../service/trackingService';
 import { syncWorkouts } from '../service/syncService';
 
@@ -9,14 +9,15 @@ export const SyncProvider = ({ children }) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingCount, setPendingCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Update sync status from storage
-  const updateSyncStatus = () => {
+  const updateSyncStatus = useCallback(() => {
     const status = getSyncQueueStatus();
     setPendingCount(status.pending);
     setFailedCount(status.failed);
 
-    if (!isOnline) {
+    if (!navigator.onLine) {
       setSyncStatus('offline');
     } else if (status.failed > 0) {
       setSyncStatus('failed');
@@ -25,14 +26,21 @@ export const SyncProvider = ({ children }) => {
     } else {
       setSyncStatus('synced');
     }
-  };
+  }, []);
 
   // Trigger sync with actual syncService
-  const triggerSync = async () => {
-    if (!isOnline) {
+  const triggerSync = useCallback(async () => {
+    if (!navigator.onLine) {
       return { success: false, reason: 'offline' };
     }
 
+    // Prevent concurrent sync attempts
+    if (isSyncing) {
+      console.log('Sync already in progress, skipping...');
+      return { success: false, reason: 'already_syncing' };
+    }
+
+    setIsSyncing(true);
     setSyncStatus('syncing');
 
     try {
@@ -43,8 +51,10 @@ export const SyncProvider = ({ children }) => {
       console.error('Sync error:', error);
       updateSyncStatus();
       return { success: false, error: error.message };
+    } finally {
+      setIsSyncing(false);
     }
-  };
+  }, [updateSyncStatus, isSyncing]);
 
   // Setup network listeners
   useEffect(() => {
@@ -87,7 +97,7 @@ export const SyncProvider = ({ children }) => {
       window.removeEventListener('workout-changed', handleWorkoutChanged);
       clearInterval(interval);
     };
-  }, [isOnline]);
+  }, [triggerSync, updateSyncStatus]);
 
   const value = {
     syncStatus,

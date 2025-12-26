@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getCurrentUser } from '../service/authService';
@@ -11,18 +11,7 @@ const WorkoutDetail = () => {
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  useEffect(() => {
-    // Check authentication
-    const user = getCurrentUser();
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    loadWorkout();
-  }, [id, navigate]);
-
-  const loadWorkout = () => {
+  const loadWorkout = useCallback(() => {
     try {
       setLoading(true);
       const foundWorkout = getWorkoutById(id);
@@ -39,7 +28,18 @@ const WorkoutDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
+
+  useEffect(() => {
+    // Check authentication
+    const user = getCurrentUser();
+    if (!user) {
+      navigate('/');
+      return;
+    }
+
+    loadWorkout();
+  }, [navigate, loadWorkout]);
 
   const handleBack = () => {
     navigate('/history');

@@ -1,7 +1,15 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { continueAsGuest } from '../service/authService';
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
+  const handleContinueAsGuest = () => {
+    continueAsGuest();
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -26,12 +34,23 @@ const HomePage = () => {
           <p className="mt-4 text-lg">
             Stay motivated and achieve your fitness goals with personalized workouts, progress tracking, and more.
           </p>
-          <Link
-            to="/get-started"
-            className="mt-8 px-6 py-3 bg-white text-blue-600 font-semibold rounded-full shadow inline-block"
-          >
-            Get Started
-          </Link>
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link
+              to="/get-started"
+              className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-full shadow inline-block hover:bg-gray-100 transition"
+            >
+              Get Started
+            </Link>
+            <button
+              onClick={handleContinueAsGuest}
+              className="px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-full shadow hover:bg-white hover:text-blue-600 transition"
+            >
+              Continue as Guest
+            </button>
+          </div>
+          <p className="mt-4 text-sm text-blue-100">
+            No account needed - start tracking your workouts offline right away
+          </p>
         </div>
       </section>
 

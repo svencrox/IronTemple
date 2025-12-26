@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../service/authService';
 import { getAllWorkouts, getWorkoutsByDateRange } from '../service/trackingService';
@@ -12,22 +12,7 @@ const WorkoutHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check authentication
-    const user = getCurrentUser();
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    loadWorkouts();
-  }, [navigate]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [filter, searchTerm, workouts]);
-
-  const loadWorkouts = () => {
+  const loadWorkouts = useCallback(() => {
     try {
       setLoading(true);
       const allWorkouts = getAllWorkouts();
@@ -38,9 +23,9 @@ const WorkoutHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...workouts];
 
     // Apply date filter
@@ -68,7 +53,22 @@ const WorkoutHistory = () => {
     }
 
     setFilteredWorkouts(filtered);
-  };
+  }, [workouts, filter, searchTerm]);
+
+  useEffect(() => {
+    // Check authentication
+    const user = getCurrentUser();
+    if (!user) {
+      navigate('/');
+      return;
+    }
+
+    loadWorkouts();
+  }, [navigate, loadWorkouts]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const handleBack = () => {
     navigate('/dashboard');

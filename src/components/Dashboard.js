@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { getCurrentUser, logout } from '../service/authService';
+import { getCurrentUser, logout, isGuestUser } from '../service/authService';
 import { getRecentWorkouts, getWorkoutStats } from '../service/trackingService';
 import { useSyncContext } from '../context/SyncContext';
 import SyncStatusIndicator from './common/SyncStatusIndicator';
@@ -13,20 +13,9 @@ const Dashboard = () => {
   const [workouts, setWorkouts] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
-  useEffect(() => {
-    // Check authentication
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate('/login');
-      return;
-    }
-
-    setUser(currentUser);
-    loadDashboardData();
-  }, [navigate]);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const recentWorkouts = getRecentWorkouts(5);
@@ -40,11 +29,25 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [updateSyncStatus]);
+
+  useEffect(() => {
+    // Check authentication
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      navigate('/');
+      return;
+    }
+
+    setUser(currentUser);
+    setIsGuest(isGuestUser());
+    loadDashboardData();
+  }, [navigate, loadDashboardData]);
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    // Guest users should go to home page, authenticated users to login
+    navigate(isGuest ? '/' : '/login');
   };
 
   const handleStartWorkout = () => {
@@ -76,7 +79,7 @@ const Dashboard = () => {
               <p className="text-sm text-gray-500">Track your fitness journey</p>
             </div>
             <div className="flex items-center gap-4">
-              <SyncStatusIndicator />
+              {!isGuest && <SyncStatusIndicator />}
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
@@ -89,6 +92,28 @@ const Dashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Guest Mode Banner */}
+        {isGuest && (
+          <div className="bg-blue-50 border-l-4 border-blue-600 p-4 mb-6 rounded">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm text-blue-700">
+                  You're using guest mode. Your workouts are saved locally on this device.{' '}
+                  <Link to="/signup" className="font-medium underline hover:text-blue-800">
+                    Create an account
+                  </Link>
+                  {' '}to sync your data across devices and never lose your progress.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
