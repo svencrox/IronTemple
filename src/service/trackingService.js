@@ -1,12 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getItem, setItem } from './storageService';
 import { getCurrentUser } from './authService';
-
-const STORAGE_KEY = 'irontemple_workouts';
+import { WORKOUTS_STORAGE_KEY } from '../constants/storageKeys';
 
 // Initialize storage structure
 const initializeStorage = () => {
-  const existing = getItem(STORAGE_KEY);
+  const existing = getItem(WORKOUTS_STORAGE_KEY);
   if (!existing) {
     const initialData = {
       workouts: {},
@@ -14,7 +13,7 @@ const initializeStorage = () => {
       lastSyncTimestamp: null,
       version: '1.0'
     };
-    setItem(STORAGE_KEY, initialData);
+    setItem(WORKOUTS_STORAGE_KEY, initialData);
     return initialData;
   }
   return existing;
@@ -22,7 +21,7 @@ const initializeStorage = () => {
 
 // Get workouts data from storage
 const getWorkoutsFromStorage = () => {
-  return getItem(STORAGE_KEY, {
+  return getItem(WORKOUTS_STORAGE_KEY, {
     workouts: {},
     syncQueue: [],
     lastSyncTimestamp: null,
@@ -32,7 +31,7 @@ const getWorkoutsFromStorage = () => {
 
 // Save workouts data to storage
 const saveWorkoutsToStorage = (data) => {
-  return setItem(STORAGE_KEY, data);
+  return setItem(WORKOUTS_STORAGE_KEY, data);
 };
 
 // Add item to sync queue
@@ -95,7 +94,11 @@ export const createWorkout = (workoutData) => {
 
   storage.workouts[workout.id] = workout;
   addToSyncQueue(workout.id, 'create');
-  saveWorkoutsToStorage(storage);
+
+  const saved = saveWorkoutsToStorage(storage);
+  if (!saved) {
+    throw new Error('Failed to save workout. Storage might be full or unavailable.');
+  }
 
   // Trigger sync (will be handled by syncService)
   window.dispatchEvent(new CustomEvent('workout-changed'));
@@ -184,7 +187,11 @@ export const updateWorkout = (id, updates) => {
 
   storage.workouts[id] = updatedWorkout;
   addToSyncQueue(id, 'update');
-  saveWorkoutsToStorage(storage);
+
+  const saved = saveWorkoutsToStorage(storage);
+  if (!saved) {
+    throw new Error('Failed to update workout. Storage might be full or unavailable.');
+  }
 
   window.dispatchEvent(new CustomEvent('workout-changed'));
 
@@ -213,7 +220,11 @@ export const deleteWorkout = (id) => {
   };
 
   addToSyncQueue(id, 'delete');
-  saveWorkoutsToStorage(storage);
+
+  const saved = saveWorkoutsToStorage(storage);
+  if (!saved) {
+    throw new Error('Failed to delete workout. Storage might be full or unavailable.');
+  }
 
   window.dispatchEvent(new CustomEvent('workout-changed'));
 
@@ -249,7 +260,11 @@ export const addExerciseToWorkout = (workoutId, exerciseData) => {
 
   storage.workouts[workoutId] = workout;
   addToSyncQueue(workoutId, 'update');
-  saveWorkoutsToStorage(storage);
+
+  const saved = saveWorkoutsToStorage(storage);
+  if (!saved) {
+    throw new Error('Failed to add exercise. Storage might be full or unavailable.');
+  }
 
   window.dispatchEvent(new CustomEvent('workout-changed'));
 
@@ -292,7 +307,11 @@ export const addSetToExercise = (workoutId, exerciseId, setData) => {
 
   storage.workouts[workoutId] = workout;
   addToSyncQueue(workoutId, 'update');
-  saveWorkoutsToStorage(storage);
+
+  const saved = saveWorkoutsToStorage(storage);
+  if (!saved) {
+    throw new Error('Failed to add set. Storage might be full or unavailable.');
+  }
 
   window.dispatchEvent(new CustomEvent('workout-changed'));
 

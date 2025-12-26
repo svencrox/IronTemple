@@ -1,5 +1,7 @@
 // Storage Service - Centralized localStorage access with error handling
 
+import { USER_STORAGE_KEY } from '../constants/storageKeys';
+
 /**
  * Get item from localStorage with JSON parsing
  * @param {string} key - Storage key
@@ -61,10 +63,10 @@ export const removeItem = (key) => {
  */
 export const clearAppData = () => {
   try {
-    const authData = getItem('user');
+    const authData = getItem(USER_STORAGE_KEY);
     localStorage.clear();
     if (authData) {
-      setItem('user', authData);
+      setItem(USER_STORAGE_KEY, authData);
     }
     return true;
   } catch (error) {

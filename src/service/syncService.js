@@ -1,13 +1,14 @@
 import axios from 'axios';
 import { getItem, setItem } from './storageService';
 import { getCurrentUser } from './authService';
+import { MAX_RETRY_COUNT, SYNC_ACTIONS } from '../constants/syncConstants';
+import { WORKOUTS_STORAGE_KEY } from '../constants/storageKeys';
 
 const API_URL = 'http://localhost:5000/api/';
-const STORAGE_KEY = 'irontemple_workouts';
 
 // Get workouts data from storage
 const getWorkoutsFromStorage = () => {
-  return getItem(STORAGE_KEY, {
+  return getItem(WORKOUTS_STORAGE_KEY, {
     workouts: {},
     syncQueue: [],
     lastSyncTimestamp: null,
@@ -17,7 +18,7 @@ const getWorkoutsFromStorage = () => {
 
 // Save workouts data to storage
 const saveWorkoutsToStorage = (data) => {
-  return setItem(STORAGE_KEY, data);
+  return setItem(WORKOUTS_STORAGE_KEY, data);
 };
 
 /**
@@ -35,8 +36,8 @@ export const isOnline = () => {
 export const getSyncStatus = () => {
   const storage = getWorkoutsFromStorage();
 
-  const pending = storage.syncQueue.filter(item => item.retryCount < 3).length;
-  const failed = storage.syncQueue.filter(item => item.retryCount >= 3).length;
+  const pending = storage.syncQueue.filter(item => item.retryCount < MAX_RETRY_COUNT).length;
+  const failed = storage.syncQueue.filter(item => item.retryCount >= MAX_RETRY_COUNT).length;
 
   return {
     pending,
@@ -99,7 +100,7 @@ const syncSingleWorkout = async (workoutId, action) => {
   let response;
 
   switch (action) {
-    case 'create':
+    case SYNC_ACTIONS.CREATE:
       if (!workout) {
         throw new Error('Workout not found');
       }
@@ -118,7 +119,7 @@ const syncSingleWorkout = async (workoutId, action) => {
       );
       break;
 
-    case 'update':
+    case SYNC_ACTIONS.UPDATE:
       if (!workout) {
         throw new Error('Workout not found');
       }
@@ -136,7 +137,7 @@ const syncSingleWorkout = async (workoutId, action) => {
       );
       break;
 
-    case 'delete':
+    case SYNC_ACTIONS.DELETE:
       response = await axios.delete(
         `${API_URL}workouts/${workoutId}`,
         config
@@ -179,7 +180,7 @@ export const syncWorkouts = async () => {
   // Process queue items sequentially
   for (const queueItem of [...syncQueue]) {
     // Skip items that have failed too many times
-    if (queueItem.retryCount >= 3) {
+    if (queueItem.retryCount >= MAX_RETRY_COUNT) {
       failedCount++;
       continue;
     }
@@ -190,7 +191,7 @@ export const syncWorkouts = async () => {
       // Success - update local data
       const workout = storage.workouts[queueItem.workoutId];
 
-      if (queueItem.action === 'delete') {
+      if (queueItem.action === SYNC_ACTIONS.DELETE) {
         // Remove deleted workout from storage
         delete storage.workouts[queueItem.workoutId];
       } else if (workout) {
@@ -213,7 +214,7 @@ export const syncWorkouts = async () => {
       // Update workout sync status
       const workout = storage.workouts[queueItem.workoutId];
       if (workout) {
-        workout.syncStatus = queueItem.retryCount >= 2 ? 'failed' : 'pending';
+        workout.syncStatus = queueItem.retryCount >= (MAX_RETRY_COUNT - 1) ? 'failed' : 'pending';
         storage.workouts[queueItem.workoutId] = workout;
       }
 
@@ -269,7 +270,7 @@ export const retryFailedSyncs = async () => {
 
   // Reset retry count for failed items
   storage.syncQueue.forEach(item => {
-    if (item.retryCount >= 3) {
+    if (item.retryCount >= MAX_RETRY_COUNT) {
       item.retryCount = 0;
       item.lastError = null;
     }
@@ -288,4 +289,69 @@ export const clearSyncQueue = () => {
   const storage = getWorkoutsFromStorage();
   storage.syncQueue = [];
   saveWorkoutsToStorage(storage);
+};
+
+/**
+ * Update all workout userIds (useful when guest upgrades to account)
+ * @param {string} newUserId - The new user ID to assign to all workouts
+ * @returns {number} Number of workouts updated
+ */
+export const updateWorkoutsUserId = (newUserId) => {
+  const storage = getWorkoutsFromStorage();
+  let updatedCount = 0;
+
+  // Update userId for all workouts
+  Object.keys(storage.workouts).forEach(workoutId => {
+    const workout = storage.workouts[workoutId];
+    if (workout.userId !== newUserId) {
+      storage.workouts[workoutId] = {
+        ...workout,
+        userId: newUserId,
+        updatedAt: new Date().toISOString()
+      };
+      updatedCount++;
+    }
+  });
+
+  if (updatedCount > 0) {
+    saveWorkoutsToStorage(storage);
+  }
+
+  return updatedCount;
+};
+
+/**
+ * Queue all local workouts for sync (useful when guest upgrades to account)
+ * @returns {number} Number of workouts queued
+ */
+export const queueAllWorkoutsForSync = () => {
+  const storage = getWorkoutsFromStorage();
+  let queuedCount = 0;
+
+  // Queue all workouts that aren't already synced
+  Object.keys(storage.workouts).forEach(workoutId => {
+    const workout = storage.workouts[workoutId];
+
+    // Only queue if not already synced or in queue
+    if (workout.syncStatus !== 'synced') {
+      const existingInQueue = storage.syncQueue.find(item => item.workoutId === workoutId);
+
+      if (!existingInQueue) {
+        storage.syncQueue.push({
+          workoutId,
+          action: SYNC_ACTIONS.CREATE,
+          timestamp: new Date().toISOString(),
+          retryCount: 0,
+          lastError: null
+        });
+        queuedCount++;
+      }
+    }
+  });
+
+  if (queuedCount > 0) {
+    saveWorkoutsToStorage(storage);
+  }
+
+  return queuedCount;
 };
