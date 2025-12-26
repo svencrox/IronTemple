@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { register } from '../service/authService';
+import { register, isGuestUser } from '../service/authService';
+import { migrateGuestWorkouts } from '../utils/guestMigration';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -113,12 +114,19 @@ const SignUp = () => {
     }
 
     setIsSubmitting(true);
+    const wasGuest = isGuestUser();
 
     try {
       const response = await register(formData.name, formData.email, formData.password);
       console.log('User registered:', response);
 
       toast.success('Registration successful! Redirecting to dashboard...');
+
+      // If user was a guest, migrate their local workouts to the new account
+      if (wasGuest) {
+        const userId = response.data.id || response.data._id;
+        await migrateGuestWorkouts(wasGuest, userId);
+      }
 
       setTimeout(() => {
         navigate('/dashboard');
