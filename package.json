@@ -2,6 +2,7 @@
 	"name": "fitness-tracker-web",
 	"version": "0.1.0",
 	"private": true,
+	"homepage": "https://svencrox.github.io/IronTemple/",
 	"dependencies": {
 		"@testing-library/user-event": "^13.5.0",
 		"axios": "^1.7.4",
