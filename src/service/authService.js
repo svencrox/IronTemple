@@ -1,7 +1,4 @@
-import axios from 'axios';
 import { USER_STORAGE_KEY } from '../constants/storageKeys';
-
-const API_URL = 'http://localhost:5000/api/auth/';
 
 // Create a guest user for offline usage
 export const createGuestUser = () => {
@@ -22,47 +19,38 @@ export const isGuestUser = () => {
   return user && user.isGuest === true;
 };
 
-// Register a new user (handles guest data migration)
+// Register a new user (local-only, no backend)
 export const register = async (name, email, password) => {
   const wasGuest = isGuestUser();
 
-  const response = await axios.post(API_URL + 'register', {
+  const newUser = {
+    id: `user_${Date.now()}`,
     name,
     email,
-    password,
-  });
+    isGuest: false,
+    upgradedFromGuest: wasGuest,
+    createdAt: new Date().toISOString(),
+  };
 
-  if (response.data.token) {
-    const newUser = {
-      ...response.data,
-      isGuest: false,
-      upgradedFromGuest: wasGuest,
-    };
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(newUser));
-  }
-
-  return response.data;
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(newUser));
+  return newUser;
 };
 
-// Login existing user (handles guest data migration)
+// Login existing user (local-only, no backend)
 export const login = async (email, password) => {
   const wasGuest = isGuestUser();
 
-  const response = await axios.post(API_URL + 'login', {
+  const user = {
+    id: `user_${Date.now()}`,
+    name: email.split('@')[0],
     email,
-    password,
-  });
+    isGuest: false,
+    upgradedFromGuest: wasGuest,
+    createdAt: new Date().toISOString(),
+  };
 
-  if (response.data.token) {
-    const user = {
-      ...response.data,
-      isGuest: false,
-      upgradedFromGuest: wasGuest,
-    };
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-  }
-
-  return response.data;
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  return user;
 };
 
 // Logout user (removes from localStorage)

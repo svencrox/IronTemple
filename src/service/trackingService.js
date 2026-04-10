@@ -34,36 +34,6 @@ const saveWorkoutsToStorage = (data) => {
   return setItem(WORKOUTS_STORAGE_KEY, data);
 };
 
-// Add item to sync queue
-const addToSyncQueue = (workoutId, action) => {
-  const storage = getWorkoutsFromStorage();
-
-  // Check if this workout is already in queue
-  const existingIndex = storage.syncQueue.findIndex(
-    item => item.workoutId === workoutId
-  );
-
-  if (existingIndex !== -1) {
-    // Update existing queue item
-    storage.syncQueue[existingIndex] = {
-      ...storage.syncQueue[existingIndex],
-      action,
-      timestamp: new Date().toISOString(),
-      retryCount: 0
-    };
-  } else {
-    // Add new queue item
-    storage.syncQueue.push({
-      workoutId,
-      action,
-      timestamp: new Date().toISOString(),
-      retryCount: 0,
-      lastError: null
-    });
-  }
-
-  saveWorkoutsToStorage(storage);
-};
 
 /**
  * Create a new workout
@@ -86,21 +56,19 @@ export const createWorkout = (workoutData) => {
     exercises: workoutData.exercises || [],
     notes: workoutData.notes || '',
     duration: workoutData.duration || 0,
-    syncStatus: 'pending',
+    syncStatus: 'synced',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     serverSyncedAt: null
   };
 
   storage.workouts[workout.id] = workout;
-  addToSyncQueue(workout.id, 'create');
 
   const saved = saveWorkoutsToStorage(storage);
   if (!saved) {
     throw new Error('Failed to save workout. Storage might be full or unavailable.');
   }
 
-  // Trigger sync (will be handled by syncService)
   window.dispatchEvent(new CustomEvent('workout-changed'));
 
   return workout;
@@ -182,11 +150,10 @@ export const updateWorkout = (id, updates) => {
     ...updates,
     id, // Prevent ID from being changed
     updatedAt: new Date().toISOString(),
-    syncStatus: 'pending'
+    syncStatus: 'synced'
   };
 
   storage.workouts[id] = updatedWorkout;
-  addToSyncQueue(id, 'update');
 
   const saved = saveWorkoutsToStorage(storage);
   if (!saved) {
@@ -216,10 +183,8 @@ export const deleteWorkout = (id) => {
     ...workout,
     deleted: true,
     deletedAt: new Date().toISOString(),
-    syncStatus: 'pending'
+    syncStatus: 'synced'
   };
-
-  addToSyncQueue(id, 'delete');
 
   const saved = saveWorkoutsToStorage(storage);
   if (!saved) {
@@ -256,10 +221,9 @@ export const addExerciseToWorkout = (workoutId, exerciseData) => {
 
   workout.exercises.push(exercise);
   workout.updatedAt = new Date().toISOString();
-  workout.syncStatus = 'pending';
+  workout.syncStatus = 'synced';
 
   storage.workouts[workoutId] = workout;
-  addToSyncQueue(workoutId, 'update');
 
   const saved = saveWorkoutsToStorage(storage);
   if (!saved) {
@@ -303,10 +267,9 @@ export const addSetToExercise = (workoutId, exerciseId, setData) => {
 
   exercise.sets.push(set);
   workout.updatedAt = new Date().toISOString();
-  workout.syncStatus = 'pending';
+  workout.syncStatus = 'synced';
 
   storage.workouts[workoutId] = workout;
-  addToSyncQueue(workoutId, 'update');
 
   const saved = saveWorkoutsToStorage(storage);
   if (!saved) {
