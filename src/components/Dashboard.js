@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getCurrentUser, logout, isGuestUser } from '../service/authService';
 import { getRecentWorkouts, getWorkoutStats } from '../service/trackingService';
 import { useSyncContext } from '../context/SyncContext';
-import SyncStatusIndicator from './common/SyncStatusIndicator';
 import WorkoutCard from './common/WorkoutCard';
 
 const Dashboard = () => {
