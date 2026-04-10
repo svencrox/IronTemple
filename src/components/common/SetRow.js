@@ -24,8 +24,8 @@ const SetRow = ({ set, onChange, onRemove }) => {
           min="0"
           value={set.reps}
           onChange={(e) => handleChange('reps', e.target.value)}
+          onFocus={(e) => e.target.select()}
           className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="0"
           required
         />
       </div>
@@ -38,8 +38,8 @@ const SetRow = ({ set, onChange, onRemove }) => {
           step="0.5"
           value={set.weight}
           onChange={(e) => handleChange('weight', e.target.value)}
+          onFocus={(e) => e.target.select()}
           className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="0"
           required
         />
       </div>

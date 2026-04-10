@@ -103,7 +103,7 @@ const ExerciseForm = ({ exercise, exerciseNumber, onChange, onRemove }) => {
             <div className="grid grid-cols-12 gap-2 px-2 text-xs font-medium text-gray-500">
               <div className="col-span-1">Set</div>
               <div className="col-span-4">Reps</div>
-              <div className="col-span-5">Weight (lbs)</div>
+              <div className="col-span-5">Weight</div>
               <div className="col-span-2"></div>
             </div>
 
