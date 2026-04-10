@@ -79,7 +79,7 @@ const Dashboard = () => {
               <p className="text-sm text-gray-500">Track your fitness journey</p>
             </div>
             <div className="flex items-center gap-4">
-              {!isGuest && <SyncStatusIndicator />}
+              {/* SyncStatusIndicator hidden until backend is connected */}
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
@@ -135,7 +135,7 @@ const Dashboard = () => {
             </div>
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-sm font-medium text-gray-500 mb-2">
-                Total Volume (lbs)
+                Total Volume
               </div>
               <div className="text-3xl font-bold text-purple-600">
                 {stats.totalVolume.toLocaleString()}

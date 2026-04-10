@@ -13,6 +13,7 @@ export const USER_STORAGE_KEY = 'user';
 /**
  * Storage key for app settings (future use)
  */
+export const USERS_STORAGE_KEY = 'irontemple_users';
 export const SETTINGS_STORAGE_KEY = 'irontemple_settings';
 
 /**

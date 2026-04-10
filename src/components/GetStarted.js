@@ -1,14 +1,17 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { continueAsGuest } from "../service/authService";
+
+const PREFERENCES_KEY = "irontemple_preferences";
 
 const GetStarted = () => {
+	const navigate = useNavigate();
 	const [formData, setFormData] = useState({
 		fitnessGoal: "",
 		experienceLevel: "",
 		workoutType: "",
 		workoutFrequency: "",
-		timeCommitment: "",
-		dietaryPreference: "",
 	});
 
 	const handleChange = (e) => {
@@ -18,8 +21,15 @@ const GetStarted = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		// Handle form submission
-		console.log("User's Fitness Goals:", formData);
+		localStorage.setItem(PREFERENCES_KEY, JSON.stringify(formData));
+		toast.success("Preferences saved! Create an account or continue as guest.");
+		navigate("/signup");
+	};
+
+	const handleContinueAsGuest = () => {
+		localStorage.setItem(PREFERENCES_KEY, JSON.stringify(formData));
+		continueAsGuest();
+		navigate("/dashboard");
 	};
 
 	return (
@@ -48,23 +58,12 @@ const GetStarted = () => {
 							className='w-full p-3 border border-gray-300 rounded'
 							required
 						>
-							<option
-								value=''
-								disabled
-							>
-								Select your goal
-							</option>
-							<option value='Lose Weight'>Lose Weight</option>
-							<option value='Build Muscle'>Build Muscle</option>
-							<option value='Improve Endurance'>
-								Improve Endurance
-							</option>
-							<option value='Increase Flexibility'>
-								Increase Flexibility
-							</option>
-							<option value='Maintain General Fitness'>
-								Maintain General Fitness
-							</option>
+							<option value='' disabled>Select your goal</option>
+							<option value='lose-weight'>Lose Weight</option>
+							<option value='build-muscle'>Build Muscle</option>
+							<option value='improve-endurance'>Improve Endurance</option>
+							<option value='increase-flexibility'>Increase Flexibility</option>
+							<option value='general-fitness'>Maintain General Fitness</option>
 						</select>
 					</div>
 					<div className='mb-4'>
@@ -78,15 +77,10 @@ const GetStarted = () => {
 							className='w-full p-3 border border-gray-300 rounded'
 							required
 						>
-							<option
-								value=''
-								disabled
-							>
-								Select your experience level
-							</option>
-							<option value='Beginner'>Beginner</option>
-							<option value='Intermediate'>Intermediate</option>
-							<option value='Advanced'>Advanced</option>
+							<option value='' disabled>Select your experience level</option>
+							<option value='beginner'>Beginner</option>
+							<option value='intermediate'>Intermediate</option>
+							<option value='advanced'>Advanced</option>
 						</select>
 					</div>
 					<div className='mb-4'>
@@ -100,22 +94,15 @@ const GetStarted = () => {
 							className='w-full p-3 border border-gray-300 rounded'
 							required
 						>
-							<option
-								value=''
-								disabled
-							>
-								Select your workout type
-							</option>
-							<option value='Strength Training'>
-								Strength Training
-							</option>
-							<option value='Cardio'>Cardio</option>
-							<option value='Yoga/Pilates'>Yoga/Pilates</option>
-							<option value='HIIT'>HIIT</option>
-							<option value='Mixed'>Mixed</option>
+							<option value='' disabled>Select your workout type</option>
+							<option value='strength'>Strength Training</option>
+							<option value='cardio'>Cardio</option>
+							<option value='yoga-pilates'>Yoga/Pilates</option>
+							<option value='hiit'>HIIT</option>
+							<option value='mixed'>Mixed</option>
 						</select>
 					</div>
-					<div className='mb-4'>
+					<div className='mb-6'>
 						<label className='block text-gray-700 mb-2'>
 							How many days per week do you plan to work out?
 						</label>
@@ -126,25 +113,27 @@ const GetStarted = () => {
 							className='w-full p-3 border border-gray-300 rounded'
 							required
 						>
-							<option
-								value=''
-								disabled
-							>
-								Select frequency
-							</option>
-							<option value='1-2 days'>2 days</option>
-							<option value='3-4 days'>3 days</option>
-							<option value='5-6 days'>4 days</option>
-							<option value='5-6 days'>5 days</option>
-							<option value='5-6 days'>6 days</option>
-							<option value='7 days'>7 days</option>
+							<option value='' disabled>Select frequency</option>
+							<option value='2'>2 days</option>
+							<option value='3'>3 days</option>
+							<option value='4'>4 days</option>
+							<option value='5'>5 days</option>
+							<option value='6'>6 days</option>
+							<option value='7'>7 days</option>
 						</select>
 					</div>
 					<button
 						type='submit'
-						className='w-full bg-blue-600 text-white p-3 rounded-lg font-semibold shadow-lg'
+						className='w-full bg-blue-600 text-white p-3 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition mb-3'
 					>
-						Submit
+						Create an Account
+					</button>
+					<button
+						type='button'
+						onClick={handleContinueAsGuest}
+						className='w-full border-2 border-blue-600 text-blue-600 p-3 rounded-lg font-semibold hover:bg-blue-50 transition'
+					>
+						Continue as Guest
 					</button>
 				</form>
 			</div>
