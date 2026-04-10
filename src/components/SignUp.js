@@ -124,7 +124,7 @@ const SignUp = () => {
 
       // If user was a guest, migrate their local workouts to the new account
       if (wasGuest) {
-        const userId = response.data.id || response.data._id;
+        const userId = response.id;
         await migrateGuestWorkouts(wasGuest, userId);
       }
 

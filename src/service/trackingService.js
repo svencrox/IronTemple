@@ -52,7 +52,7 @@ export const createWorkout = (workoutData) => {
     id: uuidv4(),
     userId: user.id || user._id,
     name: workoutData.name || 'Untitled Workout',
-    date: workoutData.date || new Date().toISOString(),
+    date: workoutData.date || new Date().toISOString().split('T')[0],
     exercises: workoutData.exercises || [],
     notes: workoutData.notes || '',
     duration: workoutData.duration || 0,
@@ -288,14 +288,16 @@ export const addSetToExercise = (workoutId, exerciseId, setData) => {
 export const getWorkoutStats = () => {
   const allWorkouts = getAllWorkouts();
 
-  // Get workouts from this week
+  // Get workouts from this week (parse as local date to avoid UTC offset)
   const now = new Date();
   const weekStart = new Date(now);
   weekStart.setDate(now.getDate() - 7);
+  weekStart.setHours(0, 0, 0, 0);
 
-  const thisWeekWorkouts = allWorkouts.filter(
-    workout => new Date(workout.date) >= weekStart
-  );
+  const thisWeekWorkouts = allWorkouts.filter(workout => {
+    const [year, month, day] = workout.date.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day) >= weekStart;
+  });
 
   // Calculate total volume (sets * reps * weight)
   let totalVolume = 0;

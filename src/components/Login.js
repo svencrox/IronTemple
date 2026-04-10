@@ -30,7 +30,7 @@ const Login = () => {
 
       // If user was a guest, migrate their local workouts to their account
       if (wasGuest) {
-        const userId = response.data.id || response.data._id;
+        const userId = response.id;
         await migrateGuestWorkouts(wasGuest, userId);
       }
 

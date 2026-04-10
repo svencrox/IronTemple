@@ -1,6 +1,8 @@
 import './App.css';
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { SyncProvider } from './context/SyncContext';
 import HomePage from './components/HomePage';
 import SignUp from './components/SignUp';
@@ -14,7 +16,7 @@ import WorkoutDetail from './components/WorkoutDetail';
 function App() {
   return (
     <SyncProvider>
-      <Router>
+      <Router basename={process.env.REACT_APP_BASENAME || '/'}>
         <div>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -28,6 +30,7 @@ function App() {
             <Route path="/history" element={<WorkoutHistory />} />
           </Routes>
         </div>
+        <ToastContainer position="top-right" autoClose={3000} />
       </Router>
     </SyncProvider>
   );

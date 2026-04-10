@@ -5,7 +5,9 @@ const WorkoutCard = ({ workout }) => {
   const navigate = useNavigate();
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
+    // Parse as local date to avoid UTC-offset shifting the day
+    const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
