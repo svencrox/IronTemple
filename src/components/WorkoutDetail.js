@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getCurrentUser } from '../service/authService';
@@ -69,8 +69,8 @@ const WorkoutDetail = () => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    const [y, m, d] = dateString.split('T')[0].split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -78,23 +78,19 @@ const WorkoutDetail = () => {
     });
   };
 
-  const getTotalVolume = () => {
-    let volume = 0;
-    workout.exercises.forEach(exercise => {
-      exercise.sets.forEach(set => {
-        if (set.completed) {
-          volume += set.reps * set.weight;
-        }
-      });
-    });
-    return volume;
-  };
+  const totalVolume = useMemo(() => {
+    if (!workout) return 0;
+    return workout.exercises.reduce((vol, exercise) =>
+      vol + exercise.sets.reduce((s, set) =>
+        s + (set.completed ? set.reps * set.weight : 0), 0
+      ), 0
+    );
+  }, [workout]);
 
-  const getTotalSets = () => {
-    return workout.exercises.reduce((total, exercise) => {
-      return total + exercise.sets.length;
-    }, 0);
-  };
+  const totalSets = useMemo(() => {
+    if (!workout) return 0;
+    return workout.exercises.reduce((total, exercise) => total + exercise.sets.length, 0);
+  }, [workout]);
 
   if (loading) {
     return (
@@ -161,11 +157,11 @@ const WorkoutDetail = () => {
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <div className="text-sm font-medium text-gray-500 mb-2">Total Sets</div>
-            <div className="text-3xl font-bold text-green-600">{getTotalSets()}</div>
+            <div className="text-3xl font-bold text-green-600">{totalSets}</div>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <div className="text-sm font-medium text-gray-500 mb-2">Total Volume</div>
-            <div className="text-3xl font-bold text-purple-600">{getTotalVolume().toLocaleString()}</div>
+            <div className="text-3xl font-bold text-purple-600">{totalVolume.toLocaleString()}</div>
           </div>
         </div>
 

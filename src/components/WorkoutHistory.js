@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../service/authService';
-import { getAllWorkouts, getWorkoutsByDateRange } from '../service/trackingService';
+import { getAllWorkouts } from '../service/trackingService';
 import WorkoutCard from './common/WorkoutCard';
 
 const WorkoutHistory = () => {
@@ -10,6 +10,7 @@ const WorkoutHistory = () => {
   const [filteredWorkouts, setFilteredWorkouts] = useState([]);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   const loadWorkouts = useCallback(() => {
@@ -25,35 +26,44 @@ const WorkoutHistory = () => {
     }
   }, []);
 
+  // Debounce search input by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const parseLocalDate = (dateString) => {
+    const [y, m, d] = dateString.split('T')[0].split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
+
   const applyFilters = useCallback(() => {
     let filtered = [...workouts];
 
-    // Apply date filter
+    // Filter from already-loaded state — no extra localStorage reads
     if (filter === 'week') {
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      filtered = getWorkoutsByDateRange(weekAgo.toISOString(), new Date().toISOString());
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 7);
+      cutoff.setHours(0, 0, 0, 0);
+      filtered = filtered.filter(w => parseLocalDate(w.date) >= cutoff);
     } else if (filter === 'month') {
-      const monthAgo = new Date();
-      monthAgo.setMonth(monthAgo.getMonth() - 1);
-      filtered = getWorkoutsByDateRange(monthAgo.toISOString(), new Date().toISOString());
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - 1);
+      cutoff.setHours(0, 0, 0, 0);
+      filtered = filtered.filter(w => parseLocalDate(w.date) >= cutoff);
     }
 
-    // Apply search filter
-    if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(workout => {
-        const nameMatch = workout.name.toLowerCase().includes(searchLower);
-        const exerciseMatch = workout.exercises.some(ex =>
-          ex.name.toLowerCase().includes(searchLower)
-        );
-        const notesMatch = workout.notes?.toLowerCase().includes(searchLower);
-        return nameMatch || exerciseMatch || notesMatch;
-      });
+    if (debouncedSearch.trim()) {
+      const term = debouncedSearch.toLowerCase();
+      filtered = filtered.filter(workout =>
+        workout.name.toLowerCase().includes(term) ||
+        workout.exercises.some(ex => ex.name.toLowerCase().includes(term)) ||
+        workout.notes?.toLowerCase().includes(term)
+      );
     }
 
     setFilteredWorkouts(filtered);
-  }, [workouts, filter, searchTerm]);
+  }, [workouts, filter, debouncedSearch]);
 
   useEffect(() => {
     // Check authentication

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+
 import { getSyncQueueStatus } from '../service/trackingService';
 import { syncWorkouts } from '../service/syncService';
 
@@ -9,7 +10,7 @@ export const SyncProvider = ({ children }) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingCount, setPendingCount] = useState(0);
   const [failedCount, setFailedCount] = useState(0);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const isSyncingRef = useRef(false);
 
   // Update sync status from storage
   const updateSyncStatus = useCallback(() => {
@@ -34,13 +35,12 @@ export const SyncProvider = ({ children }) => {
       return { success: false, reason: 'offline' };
     }
 
-    // Prevent concurrent sync attempts
-    if (isSyncing) {
-      console.log('Sync already in progress, skipping...');
+    // Use ref to prevent concurrent syncs without adding isSyncing to deps
+    if (isSyncingRef.current) {
       return { success: false, reason: 'already_syncing' };
     }
 
-    setIsSyncing(true);
+    isSyncingRef.current = true;
     setSyncStatus('syncing');
 
     try {
@@ -52,9 +52,9 @@ export const SyncProvider = ({ children }) => {
       updateSyncStatus();
       return { success: false, error: error.message };
     } finally {
-      setIsSyncing(false);
+      isSyncingRef.current = false;
     }
-  }, [updateSyncStatus, isSyncing]);
+  }, [updateSyncStatus]);
 
   // Setup network listeners
   useEffect(() => {
@@ -85,17 +85,11 @@ export const SyncProvider = ({ children }) => {
     // Initial status update
     updateSyncStatus();
 
-    // Periodic status check (every 5 seconds)
-    const interval = setInterval(() => {
-      updateSyncStatus();
-    }, 5000);
-
     // Cleanup
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('workout-changed', handleWorkoutChanged);
-      clearInterval(interval);
     };
   }, [triggerSync, updateSyncStatus]);
 

@@ -56,6 +56,8 @@ const WorkoutCard = ({ workout }) => {
     }, 0);
   };
 
+  const totalSets = getTotalSets();
+
   const handleClick = () => {
     navigate(`/workout/detail/${workout.id}`);
   };
@@ -94,7 +96,7 @@ const WorkoutCard = ({ workout }) => {
               d="M4 6h16M4 12h16M4 18h16"
             />
           </svg>
-          <span>{getTotalSets()} set{getTotalSets() !== 1 ? 's' : ''}</span>
+          <span>{totalSets} set{totalSets !== 1 ? 's' : ''}</span>
         </div>
         {workout.duration > 0 && (
           <div className="flex items-center gap-1">
